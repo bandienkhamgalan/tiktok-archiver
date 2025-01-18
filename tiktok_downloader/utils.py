@@ -112,7 +112,7 @@ class TiktokDownloader:
         start_time = time.time()
         total = 0
         success = 0
-        for data in video_list[:1]:
+        for data in video_list:
             try:
                 if not filter_fn(data):
                     continue
