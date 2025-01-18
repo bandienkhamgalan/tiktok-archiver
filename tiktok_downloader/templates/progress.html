@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Progress</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            background-color: #007bff;
+            color: #fff;
+            padding: 20px;
+            margin: 0;
+        }
+
+        h2 {
+            text-align: center;
+            color: #444;
+            margin: 10px 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        #progress {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            font-family: monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #333;
+        }
+
+        .message {
+            margin: 5px 0;
+        }
+
+        .timestamp {
+            font-size: 12px;
+            color: #888;
+            margin-left: 10px;
+        }
+
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Processing Your TikTok Data...</h1>
+    <h2>DO NOT CLOSE THIS PAGE</h2>
+    <div class="container">
+        <div id="progress"></div>
+    </div>
+
+    <script>
+        const progressDiv = document.getElementById('progress');
+        const eventSource = new EventSource('/progress/');
+
+        eventSource.onmessage = function (event) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message';
+
+            const messageText = document.createElement('span');
+            messageText.textContent = event.data;
+
+            const timestampSpan = document.createElement('span');
+            const now = new Date();
+            timestampSpan.textContent = ` [${now.toLocaleTimeString()}]`;
+            timestampSpan.className = 'timestamp';
+
+            // Highlight success messages
+            if (event.data.includes("All downloads completed successfully!")) {
+                messageText.className = 'success';
+                eventSource.close();
+                setTimeout(() => (window.location.href = "/"), 1000);
+            }
+
+            messageDiv.appendChild(messageText);
+            messageDiv.appendChild(timestampSpan);
+
+            progressDiv.appendChild(messageDiv);
+
+            // Scroll to the bottom of the progress div
+            progressDiv.scrollTop = progressDiv.scrollHeight;
+        };
+
+        eventSource.onerror = function () {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'message';
+
+            const errorText = document.createElement('span');
+            errorText.textContent = "Connection lost. Please refresh the page.";
+            errorText.className = 'error';
+
+            const timestampSpan = document.createElement('span');
+            const now = new Date();
+            timestampSpan.textContent = ` [${now.toLocaleTimeString()}]`;
+            timestampSpan.className = 'timestamp';
+
+            errorDiv.appendChild(errorText);
+            errorDiv.appendChild(timestampSpan);
+
+            progressDiv.appendChild(errorDiv);
+
+            // Scroll to the bottom of the progress div
+            progressDiv.scrollTop = progressDiv.scrollHeight;
+
+            eventSource.close();
+        };
+    </script>
+</body>
+</html>
